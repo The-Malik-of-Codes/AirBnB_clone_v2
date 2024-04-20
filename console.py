@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Console Module """
+""" Console Module for the HBNB project """
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -13,7 +13,7 @@ from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
-    """ Contains the functionality for the HBNB console"""
+    """ Contains the entry point of the command interpreter"""
 
     # determines prompt for interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
@@ -74,8 +74,7 @@ class HBNBCommand(cmd.Cmd):
                 if pline:
                     # check for *args or **kwargs
                     if pline[0] == '{' and pline[-1] == '}' and \
-                            type(eval(pline)) is dict:
-
+                            type(eval(pline)) == dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -115,41 +114,42 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """Create an object of any class"""
-        try:
-            # Check if arguments are provided
-            if not args:
-                raise SyntaxError("** Class name is missing **")
+        """ Create a new instance of a class"""
+        if not args:
+            raise SyntaxError("No argument provided")
 
-            # Split arguments into a list
-            arg_list = args.split(" ")
-            kwargs = {}  # Initialize keyword arguments dictionary
+        args_list = args.split()
+        cls_name = args_list[0]
 
-            # Iterate through arguments starting from the second one
-            for arg in arg_list[1:]:
-                arg_split = arg.split("=")
-                arg_split[1] = eval(arg_split[1])
+        if cls_name not in HBNBCommand.classes:
+            raise NameError("Class doesn't exist")
 
-                # If the value is a string, replace underscores with spaces
-                # and escape double quotes with a backslash
-                if isinstance(arg_split[1], str):
-                    arg_split[1] = arg_split[1].replace("_", " ")
-                    arg_split[1] = arg_split[1].replace('"', '\\"')
+        args_list = args_list[1:]
+        par = {}
 
-                # Add key-value pair to kwargs dictionary
-                kwargs[arg_split[0]] = arg_split[1]
+        new_inst = HBNBCommand.classes[cls_name]()
 
-        except SyntaxError:
-            print("** Class name missing **")
-        except NameError:
-            print("** Class doesn't exist **")
+        for ar in args_list:
+            ky_vl = ar.split("=")
+            if len(ky_vl) != 2:
+                continue
+            ky, vl = ky_vl
+            if vl.startswith('"') and vl.endswith('"'):
+                vl = vl[1:-1].replace('\\"', '"').replace("_", " ")
 
-        # Create an instance of the specified class with given parameters
-        new_instance = HBNBCommand.classes[arg_list[0]](**kwargs)
-        # Save the created instance
-        new_instance.save()
-        # Print the ID of the created instance
-        print(new_instance.id)
+            if '.' in vl:
+                vl = float(vl)
+            else:
+                try:
+                    vl = int(vl)
+                except ValueError:
+                    pass
+
+            setattr(new_inst, ky, vl)
+
+        storage.save()
+
+        print(new_inst.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -231,11 +231,13 @@ class HBNBCommand(cmd.Cmd):
             if args not in HBNBCommand.classes:
                 print("** class doesn't exist **")
                 return
-            for k, v in storage.all(HBNBCommand.classes[args]).items():
-                print_list.append(str(v))
+            for k, v in storage._FileStorage__objects.items():
+                if k.split('.')[0] == args:
+                    print_list.append(str(v))
         else:
-            for k, v in storage.all().items():
+            for k, v in storage._FileStorage__objects.items():
                 print_list.append(str(v))
+
         print(print_list)
 
     def help_all(self):
