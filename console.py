@@ -73,7 +73,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] is '{' and pline[-1] is '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -114,41 +114,44 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-    """Create an object with given parameters.
+        """Create an object with given parameters.
+        Syntax: create <Class name> <param1> <param2> ...
+        Params: <key>=<value>
+        syntax: String: "<value>", Float: <unit>.<decimal>, Integer: <number>
+        Strings enclosed in double quotes and underscores replaced by spaces.
+        """
+    def do_create(self, args):
+        try:
+            if not args:
+                raise SyntaxError("** class name missing **")
 
-    Syntax: create <Class name> <param1> <param2> ...
-    Params: <key>=<value>
-    Value syntax: String: "<value>", Float: <unit>.<decimal>, Integer: <number>
-    Strings must be enclosed in double quotes and underscores replaced by spaces.
-    """
-    try:
-        if not args:
-            raise SyntaxError("** class name missing **")
-        arg_list = args.split(" ")
-        attributes = {}
-        for arg in arg_list[1:]:
-            arg_splited = arg.split("=")
-            arg_splited[1] = eval(arg_splited[1])
-            if type(arg_splited[1]) is str:
-                arg_splited[1] = arg_splited[1].replace("_", " ").replace('"', '\\"')
-            attributes[arg_splited[0]] = arg_splited[1]
-    except SyntaxError as e:
-        print(e)
-        return
-    except NameError:
-        print("** class doesn't exist **")
-        return
+            arg_lst = args.split()
+            clss_nm = arg_lst.pop(0)
 
-    try:
-        class_name = arg_list[0]
-        if class_name not in HBNBCommand.classes:
-            raise NameError("** class doesn't exist **")
+            if clss_nm not in self.__class__.classes:
+                raise NameError("** class doesn't exist **")
 
-        new_instance = HBNBCommand.classes[class_name](**attributes)
-        new_instance.save()
-        print(new_instance.id)
-    except NameError as e:
-        print(e)
+            kwargs = {}
+            for arg in arg_lst:
+                ky, val = arg.split('=')
+                if val[0] == '"' and val[-1] == '"':
+                    val = val[1:-1]
+                    val = val.replace('\\"', '"').replace('_', ' ')
+                elif '.' in val:
+                    val = float(val)
+                else:
+                    val = int(val)
+                kwargs[ky] = val
+
+            new_instance = self.__class__.classes[clss_nm](**kwargs)
+            new_instance.save()
+            print(new_instance.id)
+
+        except SyntaxError as error:
+            print(error)
+
+        except NameError as error:
+            print(error)
 
     def help_create(self):
         """ Help information for the create method """
@@ -211,7 +214,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -343,6 +346,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
