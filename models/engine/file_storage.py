@@ -17,7 +17,7 @@ class FileStorage:
                 val = ky.replace('.', ' ')
                 val = shlex.split(val)
                 if (val[0] == cls.__name__):
-                    dictionary[k] = self.__objects[ky]
+                    dictionary[ky] = self.__objects[ky]
         return dictionary
 
     def new(self, obj):
