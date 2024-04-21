@@ -12,7 +12,7 @@ class FileStorage:
         """Returns a dictionary of models currently in storage"""
         dictionary = {}
         dict = self.__objects
-        if clas is not None:
+        if cls is not None:
             for ky in dict:
                 val = ky.replace('.', ' ')
                 val = shlex.split(val)
