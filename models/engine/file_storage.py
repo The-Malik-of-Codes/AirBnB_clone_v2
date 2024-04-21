@@ -58,6 +58,6 @@ class FileStorage:
                 ky = "{}.{}".format(type(obj).__name__, obj.id)
                 if ky in FileStorage.__objects:
                     print("Deleting key:", ky)
-                    del FileStorage.__objects[k]
+                    del FileStorage.__objects[ky]
                 else:
                     print("Key not found:", ky)
