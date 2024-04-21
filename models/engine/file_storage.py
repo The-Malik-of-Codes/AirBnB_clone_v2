@@ -58,14 +58,11 @@ class FileStorage:
             pass
 
         def delete(self, obj=None):
-            """delete obj from __objects if it is inside"""
-            if obj is None:
-                return
-            obj_to_delete = f"{obj.__class__.__name__}.{obj.id}"
-
-            try:
-                del FileStorage.__objects[obj_to_del]
-            except AttributeError:
-                pass
-            except KeyboardInterrupt:
-                pass
+            """Delete obj from __objects if it’s inside - if obj is == None"""
+            if obj is not None:
+                ky = "{}.{}".format(type(obj).__name__, obj.id)
+                if ky in FileStorage.__objects:
+                    print("Deleting key:", ky)
+                    del FileStorage.__objects[ky]
+                else:
+                    print("Key not found:", ky)
