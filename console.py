@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-""" Console Module """
+""" Console Module for the HBNB project """
 import cmd
 import sys
 from models.base_model import BaseModel
@@ -13,7 +13,7 @@ from models.review import Review
 
 
 class HBNBCommand(cmd.Cmd):
-    """ Contains the functionality for the HBNB console"""
+    """ Contains the entry point of the command interpreter"""
 
     # determines prompt for interactive/non-interactive modes
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
@@ -73,7 +73,11 @@ class HBNBCommand(cmd.Cmd):
                 if pline:
                     # check for *args or **kwargs
                     if pline[0] == '{' and pline[-1] == '}'\
+<<<<<<< HEAD
                             and type(eval(pline)) is dict:
+=======
+                            and type(eval(pline)) == dict:
+>>>>>>> refs/remotes/origin/master
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
@@ -113,6 +117,7 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
+<<<<<<< HEAD
         """ Create an object of any class"""
         try:
             if not args:
@@ -132,6 +137,44 @@ class HBNBCommand(cmd.Cmd):
         new_instance = HBNBCommand.classes[arg_list[0]](**kw)
         new_instance.save()
         print(new_instance.id)
+=======
+        """ Create a new instance of a class"""
+        if not args:
+            raise SyntaxError("No argument provided")
+
+        args_list = args.split()
+        cls_name = args_list[0]
+
+        if cls_name not in HBNBCommand.classes:
+            raise NameError("Class doesn't exist")
+
+        args_list = args_list[1:]
+        par = {}
+
+        new_inst = HBNBCommand.classes[cls_name]()
+
+        for ar in args_list:
+            ky_vl = ar.split("=")
+            if len(ky_vl) != 2:
+                continue
+            ky, vl = ky_vl
+            if vl.startswith('"') and vl.endswith('"'):
+                vl = vl[1:-1].replace('\\"', '"').replace("_", " ")
+
+            if '.' in vl:
+                vl = float(vl)
+            else:
+                try:
+                    vl = int(vl)
+                except ValueError:
+                    pass
+
+            setattr(new_inst, ky, vl)
+
+        storage.save()
+>>>>>>> refs/remotes/origin/master
+
+        print(new_inst.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -194,7 +237,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -324,6 +367,7 @@ class HBNBCommand(cmd.Cmd):
         """ Help information for the update class """
         print("Updates an object with new information")
         print("Usage: update <className> <id> <attName> <attVal>\n")
+
 
 if __name__ == "__main__":
     HBNBCommand().cmdloop()
